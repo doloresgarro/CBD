@@ -28,8 +28,8 @@ begin
     rewrite(archivoDeTexto); // creo archivo de texto
 
     while (not EOF(archivo)) do begin
-          read(archivo, numero);  // leo numero de archivo binario
-          write(archivoDeTexto, numero); // copio numero en archivo de texto
+          Read(archivo, numero);  // leo numero de archivo binario
+          Write(archivoDeTexto, numero); // copio numero en archivo de texto
           //writeln(numero); // imprime listando el contenido en pantalla
     end;
     close(archivoDeTexto);
@@ -42,7 +42,5 @@ var
 begin
    assign(archivo, 'numeros.bin');
    crearArchivoBin(archivo);
-
-
 
 end.

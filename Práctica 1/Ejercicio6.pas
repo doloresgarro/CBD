@@ -10,14 +10,29 @@ program Ejercicio6;
 uses
     crt;
 type
-    arch = file of Integer;
+    libro = record
+           nombre:string[20];
+           ISBN: string[10];
+    end;
+
+    arch = file of libro;
 var
-    archivo:arch;
+    archivo:Text;
+    archBinario: arch;
+    l:libro;
 begin
-    assgin(archivo, 'C:\Users\Dolores\Documents\Facultad\Conceptos de Bases de Datos\Práctica 1\libros.txt');
-    rewrite(archivo);
+    assign(archBinario, 'C:\Users\Dolores\Documents\Facultad\Conceptos de Bases de Datos\Prácticas\Práctica 1\ numeros.bin');
+    reset(archBinario); // abro archivo binario para lectura
+    assign(archivo, 'C:\Users\Dolores\Documents\Facultad\Conceptos de Bases de Datos\Práctica 1\libros.txt');
+    rewrite(archivo); // creo archivo de texto
 
-
+    while(not EOF(archBinario)) do begin
+        Read(archBinario, l);
+        WriteLn(archivo, l.nombre, l.ISBN);
+    end;
 
     close(archivo);
+    close(archBinario);
+    writeln('Se copio el archivo binario en el archivo de texto "libros.txt"');
+    readln();
 end.

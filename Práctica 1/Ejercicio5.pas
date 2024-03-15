@@ -24,6 +24,7 @@ uses
     sysutils;
 const
      FIN = 'zzz';
+
 type
     flores = record
            numEspecie: Integer;
@@ -35,6 +36,9 @@ type
     end;
 
    arch = file of flores;
+
+
+// --------------- PROCEDIMIENTOS --------------- 
 
 procedure leerFlor(var f: flores);
 begin
@@ -69,8 +73,33 @@ begin
      end
 end;
 
+
+{a) Reportar en pantalla la cantidad total de especies y la especie de menor y de
+    mayor altura a alcanzar. }
+procedure cantidadMaximoMinimo(var max, min:double; var numEspecieMax, numEspecieMin, total: Integer; flor:flores);
+begin
+     total:= total + 1;
+     if (flor.alturaAlcanzable > max) then begin
+        max:= flor.alturaAlcanzable;
+        numEspecieMax:= flor.numEspecie;
+     end;
+     if (flor.alturaAlcanzable < min) then begin
+        min:= flor.alturaAlcanzable;
+        numEspecieMin:= flor.numEspecie;
+     end;
+end;
+
+
+
+
+// --------------- PROGRAMA PRINCIPAL ---------------
 var
    archivo:arch;
+   flor:flores;
+   min, max: double;
+   cantTotal, numEspecieMax, numEspecieMin:Integer;
+   archivoTexto:Text;
+
 begin
    assign(archivo, 'C:\Users\Dolores\Documents\Facultad\Conceptos de Bases de Datos\Práctica 1\archivoFlores.txt');
    rewrite(archivo); // creo archivo
@@ -78,6 +107,48 @@ begin
    close(archivo);
 
    reset(archivo); // para leer el archivo
-   while
+
+  {a) Reportar en pantalla la cantidad total de especies y la especie de menor y de
+    mayor altura a alcanzar.
+   b) Listar todo el contenido del archivo de a una especie por línea.
+   c) Modificar el nombre científico de la especie flores cargada como: Victoria
+   amazonia a: Victoria amazónica.}
+   cantTotal:= 0;  min:= 99999; max:= -1;
+   while (not EOF(archivo)) do begin
+         read(archivo, flor);
+         cantidadMaximoMinimo(max, min, numEspecieMax, numEspecieMin, cantTotal, flor);
+         // Contenido de una especie por linea
+         writeln('Numero de especie: ', flor.numEspecie, ', altura máxima: ', flor.alturaMax, ', nombre cientifico: ', flor.nombreCientifico, ', nombre vulgar: ', flor.nombreVulgar, ', color: ', flor.color, ', altura alcanzable: ', flor.alturaAlcanzable);
+
+         if (flor.nombreCientifico = 'Victoria amazonia') then
+            flor.nombreCientifico:= 'Victoria amazónica';
+   end;
+   writeln('La cantidad total de especies es: ', cantTotal, ', la especie de mayor altura a alcanzar', numEspecieMax, '  la especie de menor altura a alcanzar ', numEspecieMin);
+
+   {d) Añadir una o más especies al final del archivo con sus datos obtenidos por
+   teclado. La carga finaliza al recibir especie “zzz”.}
+   seek(archivo, Filesize(archivo)-1);
+   leerFlor(flor);
+   while (flor.numEspecie <> -1) do begin
+       writeln('Añadir más especies');
+       write(archivo, flor);
+       leerFlor(flor);
+   end;
+   close(archivo);
+
+
+   {e) Listar todo el contenido del archivo, en un archivo de texto llamado “flores.txt”.
+   El archivo de texto se tiene que poder reutilizar. }
+   reset(archivo); // abro archivo para lectura
+   assign(archivoTexto, 'C:\Users\Dolores\Documents\Facultad\Conceptos de Bases de Datos\Prácticas\Práctica 1\ archTextoEj5.txt');
+   rewrite(archivoTexto); // creo el archivo
+
+   while(not EOF(archivo))do begin
+       read(archivo, flor);
+       write(archivoTexto, flor.numEspecie,flor.alturaMax, flor.nombreCientifico, flor.nombreVulgar, flor.color, flor.alturaAlcanzable);
+   end;
+
+   close(archivo);
+   close(archivoTexto);
 
 end.
