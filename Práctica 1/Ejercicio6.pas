@@ -38,10 +38,6 @@ begin
 
     while(not EOF(archBinario)) do begin
         Read(archBinario, l);
-        {La primera línea contendrá la información de ISBN y título del
-libro, la segunda línea almacenará el año de edición y la editorial y en la tercera línea el
-género del libro. (Analice otras posibles formas de representar la información en el txt)
-         }
         WriteLn(archivo, l.ISBN, l.nombre);
         Writeln(l.anio, l.editorial);
         Writeln(l.genero);
