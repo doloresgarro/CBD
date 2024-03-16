@@ -3,6 +3,6 @@
 - Prácticas:
  
 
- :thought_balloon: [Práctica 1](C:\Users\Dolores\Documents\Facultad\Conceptos de Bases de Datos\Prácticas\Práctica 1)
+ :thought_balloon: [Práctica 1](./Práctica 1)
   
 
