@@ -145,8 +145,17 @@ begin
 
    while(not EOF(archivo))do begin
        read(archivo, flor);
-       write(archivoTexto, flor.numEspecie,flor.alturaMax, flor.nombreCientifico, flor.nombreVulgar, flor.color, flor.alturaAlcanzable);
+       writeln(archivoTexto, flor.numEspecie,flor.alturaMax, flor.nombreCientifico, flor.nombreVulgar, flor.color, flor.alturaAlcanzable);
    end;
+
+   {f) para que sea reutilizable se debe tener un string por linea y debe ser LO ULTIMO por lo tanto cambio el while del e) de la siguiente manera
+   while(not EOF(archivo))do begin
+       read(archivo, flor);
+       writeln(archivoTexto, flor.numEspecie,flor.alturaMax;
+       writeln(archivoTexto,flor.nombreCientifico);
+       writeln(flor.nombreVulgar);
+       writeln(flor.alturaAlcanzable,flor.color);
+   end; }
 
    close(archivo);
    close(archivoTexto);
