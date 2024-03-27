@@ -8,10 +8,8 @@ uses
   SysUtils;
 const
      FIN = 'zzz';
-type
-    arch = file of string[20];
 var
-   archivo:arch;
+   archivo:text;
    nombre:string[20];
 begin
    assign(archivo, 'C:\Users\Dolores\Documents\Facultad\Conceptos de Bases de Datos\Práctica 1\dinosaurios.txt');
@@ -20,7 +18,7 @@ begin
    writeln('Ingrese nombre de dinosaurio: ');
    readln(nombre);
    while (nombre <> FIN) do begin
-         write(archivo, nombre);
+         writeln(archivo, nombre);
          writeln('Ingrese nombre de dinosaurio: ');
          readln(nombre);
    end;
@@ -28,5 +26,4 @@ begin
 
    writeln('Se creo el archivo "dinosaurios.txt"');
 
-   readln();
 end.
