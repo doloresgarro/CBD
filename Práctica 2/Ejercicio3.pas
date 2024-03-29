@@ -22,14 +22,11 @@ const
      valorAlto = '99999';
      N = 20;
 type
-    datosVentas = record
+    regDetalle = record
           codigo_calzado:string[5];
           numero:integer;
           cantidad_vendida:integer;
     end;
-
-    archLocales = file of datosVentas;
-    vectorLocales = array [1..N] of arhcLocales;
 
     regMaestro = record
           codigo_calzado:string[5];
@@ -42,8 +39,11 @@ type
 
     end;
 
+    archivoDetalle = file of regDetalle;
     archMaestro = file of regMaestro;
 
+    vectorArchDetalle = array [1..N] of archivoDetalle;
+    vectorRegistrosDetalle = array [1..N] of regDetalle;
 
 // ------------------- PROCEDIMIENTOS -------------------
 procedure crearArchivoMaestro(var archivo: archMaestro);
@@ -73,7 +73,7 @@ begin
 end;
 
 
-procedure crearArchivoDetalle(var detalle:vectorLocales);
+procedure crearArchivoDetalle(var detalle:vectorArchDetalle);
 var
    d:datosVentas;
 begin
@@ -95,7 +95,10 @@ begin
    end;
 end;
 
-procedure leer(var archivo:archLocales; var dato:datosVentas);
+{registrosD --> arreglo de registros detalle. Recorro el arch detalle y voy
+ almacenando en cada pos del arreglo un registro }
+
+procedure leer(var archivo:archivoDetalle; var dato:regDetalle);
 begin
    if not(EOF(archivo)) then
       read(archivo, dato)
@@ -103,54 +106,66 @@ begin
        dato.codigo_calzado:= valorAlto;
 end;
 
-function devuelveMin(v: vectorLocales): integer;
-var
-   i, valorMin, indiceMin: integer;
-begin
-	valorMin:= v[1].codigo_calzado;
-	indiceMin:= 1;
 
-	for i:=1 to N do begin
-		if (v[i].codigo_calzado < valorMin) then begin
-			valorMin:=v[i].codigo_calzado;
-			indiceMin:= i;
-		end;
-	end;
-	devuelveMin:= indiceMin;
-end;
-
-procedure minimo(var r: vectorLocales; var min: datosVentas; var det:vectorLocales);
+procedure minimo(var registrosD: registrosDetalle; var archivosD:vectorArchDetalle; var min:regDetalle);
 var
-   i: integer;
+   i, posMin: integer;
 begin
-	i:= devuelveMin(r);
-	min:= r[i];
-	leer(det[i], regd[i]);
+     posMin:= 1;
+     min:= archivosD[posMin];
+     for i:= 2 to N do begin
+         if (min.codigo_calzado > archivosD[i].codigo_calzado) then
+            min:= archivosD[posMin];
+            posMin:= i;
+         end;
+     end;
+     leer(archivosD[posMin], registrosD[posMin]); // para el proximo minimo
 end;
 
 
-{Tanto el maestro como los detalles se encuentran
-ordenados por el código de calzado y el número.
-}
-procedure actualizarMaestro(var maestro: archMaestro; var detalles: vectorLocales);
+procedure actualizarMaestro(var maestro: archMaestro; var archivos_detalle: vectorArchDetalle; var archTexto:Text; var registrosD:vectorRegistrosDetalle);
 var
-   d,aux:datosVentas;
+   aux,min:regDetalle;
    m: regMaestro;
+   :regDetalle;
    i:integer;
 begin
-     read(maestro, m);
-     minimo(detalles, );
-     while (d.codigo_calzado <> valorAlto) do begin
-           aux.codigo_calzado:= d.codigo_calzado;
 
-           while (aux.codigo_calzado = d.codigo_calzado) do begin
+     minimo(registrosD, vectorArchsDetalle, min);
+     if (not EOF(maestro)) then
+        read(maestro, m);
+
+        {Además, se deberá informar qué calzados no tuvieron ventas y cuáles quedaron por
+debajo del stock mínimo. Los calzados sin ventas se informan por pantalla, mientras
+que los calzados que quedaron por debajo del stock mínimo se deben informar en un
+archivo de texto llamado calzadosinstock.txt.
+Nota: tenga en cuenta que no se realizan ventas si no se posee stock.}
+     while (min.codigo_calzado <> valorAlto) do begin   // mientras no se termine el arch detalle
+
+           while (regM.codigo_calzado <> min.codigo_calzado)and (aux.numero = min.numero) do   // leo arch maestro hasta encontrar el codigo min
+                 read(maestro, m);
+
+           aux.codigo_calzado:= min.codigo_calzado;
+           while (aux.codigo_calzado = min.codigo_calzado) do begin // deberia ser un while junto de cod y num?
                  aux.numero:= d.numero;
 
-                 while (aux.codigo_calzado = d.codigo_calzado) and ( aux.numero = d.numero;) do begin
-
+                 while (aux.codigo_calzado = min.codigo_calzado) and (aux.numero = min.numero) do begin
+                     if (min.cantidad_vendida = 0) then
+                        writeln('El calzado ', m.codigo_calzado, ' no tuvo ventas')
+                     else begin
+                         if (m.stock_minimo > m.stock_producto - min.cantidad_vendida) then begin
+                            m.stock_producto:= m.stock_producto - min.cantidad_vendida;  // actualizo arch maestro
+                            writeln(archTexto, min.codigo_calzado); // escribo en arch de texto calzado q no tiene mas stock
+                         end;
+                     end
                  end;
+                 minimo(registrosD, vectorArchsDetalle, min);
            end;
+           // me posiciono en la ult pos del maestro y copio info
+           seek(maestro, filepos(maestro)-1);
+           write(maestro, m);
      end;
+
 end;
 
 {
@@ -162,26 +177,30 @@ ordenados por el código de calzado y el número.
 
 // ------------------- PROGRAMA PRINCIPAL -------------------
 var
-   maestro: archMaestro;
-   detalles: vectorLocales; // arreglo de archivos detalle
+   maestro: archMaestro;  // archivo maestro
+   archivos_detalle: vectorArchDetalle; // arreglo de archivos detalle
+   registrosD:vectorRegistrosDetalle;  // arreglo de registros detalle
    i:integer;
+   archTexto:Text;
 begin
-   // creo archivo maestro y detalles para probar el programa
-   assign(maestro, 'maestro.dat');
-   rewrite(maestro);
-   crearArchivoMaestro(maestro);
-   crearArchivosDetalle(detalles);
 
+
+
+   assign(maestro, 'maestro.dat');
    reset(maestro);
-   for i:=0 to N do begin
-      reset(detalles[i]);
+   for i:=1 to N do begin
+      assign(archivos_detalle[i], 'detalle' + i);
+      reset(archivos_detalle[i]);
+      leer(archivos_detalle[i], registrosD[i]); // ---
    end;
 
-   actualizarMaestro(maestro, detalles);
+   assign(archTexto, 'calzadosinstock.txt');
+   rewrite(archTexto);
 
-
+   actualizarMaestro(maestro, archivos_detalle, archTexto, registrosD);
 
    close(maestro);
+   close(archTexto);
    for i:=0 to N do begin
       close(detalles[i]);
    end;
