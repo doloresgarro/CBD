@@ -34,7 +34,7 @@ type
           descripcion:string[20];
           precio:integer; // unitario
           color:string[20];
-          stock_producto:integer: // stock de cada producto
+          stock_producto:integer; // stock de cada producto
           stock_minimo:integer; // stock minimo
 
     end;
@@ -43,10 +43,10 @@ type
     archMaestro = file of regMaestro;
 
     vectorArchDetalle = array [1..N] of archivoDetalle;
-    vectorRegistrosDetalle = array [1..N] of regDetalle;
+    registrosDetalle = array [1..N] of regDetalle;
 
 // ------------------- PROCEDIMIENTOS -------------------
-procedure crearArchivoMaestro(var archivo: archMaestro);
+{procedure crearArchivoMaestro(var archivo: archMaestro);
 var
 	d: datos;
 begin
@@ -93,7 +93,7 @@ begin
        end;
        close(detalle[i]);
    end;
-end;
+end;     }
 
 {registrosD --> arreglo de registros detalle. Recorro el arch detalle y voy
  almacenando en cada pos del arreglo un registro }
