@@ -107,14 +107,14 @@ begin
 end;
 
 
-procedure minimo(var registrosD: registrosDetalle; var archivosD:vectorArchDetalle; var min:regDetalle);
+procedure minimo(var registrosD: registrosDetalle; var archivosD:vectorArchDetalle; var min:registrosDetalle);
 var
    i, posMin: integer;
 begin
      posMin:= 1;
-     min:= archivosD[posMin];
+     min:= registrosD[posMin];
      for i:= 2 to N do begin
-         if (min.codigo_calzado > archivosD[i].codigo_calzado) then
+         if (min.codigo_calzado > registrosD[i].codigo_calzado) then begin
             min:= archivosD[posMin];
             posMin:= i;
          end;
@@ -123,11 +123,10 @@ begin
 end;
 
 
-procedure actualizarMaestro(var maestro: archMaestro; var archivos_detalle: vectorArchDetalle; var archTexto:Text; var registrosD:vectorRegistrosDetalle);
+procedure actualizarMaestro(var maestro: archMaestro; var archivos_detalle: vectorArchDetalle; var archTexto:Text; var registrosD:registrosDetalle);
 var
    aux,min:regDetalle;
    m: regMaestro;
-   :regDetalle;
    i:integer;
 begin
 

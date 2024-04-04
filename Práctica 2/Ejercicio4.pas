@@ -20,80 +20,113 @@ veces como funciones haya dentro de esa semana.
 }
 program Ejercicio4;
 const
-     valorAlto = '9999';
-     N = 3; // 20
+     valorAlto = 9999;
+     N = 20;
 type
     pelicula = record
-      codigo, duracion, cantAsistentes:integer;
-      nombre, género, director: string[20];
+      codigo, duracion:integer;
+      nombre, genero, director: string[20];
       fecha: string[8];
     end;
-    datos = file of pelicula;
-    cine = array [1..N] of datos;
 
-var
+    peliculaDetalle = record
+          cantAsistentes:integer;
+          datosPelicula:pelicula;
+    end;
+
+    peliculaMaestro = record
+          totalAsistentes: integer;
+          datosPelicula: pelicula;
+     end;
+
+
+    detalle = file of peliculaDetalle;
+    maestro = file of peliculaMaestro;
+
+    archivos_detalle = array[1..N] of detalle;
+    vector_peliculas = array [1..N] of peliculaDetalle;
+
 
 // -------- PROCEDIMIENTOS --------
 
 
-procedure leer(var archivo:archLocales; var dato:datosVentas);
+procedure leer(var archivo:detalle; var dato:peliculaDetalle);
 begin
    if not(EOF(archivo)) then
       read(archivo, dato)
    else
-       dato.codigo_calzado:= valorAlto;
+       dato.datosPelicula.codigo:= valorAlto;
 end;
 
-function devuelveMin(v: vectorLocales): integer;
+procedure minimo (archivosDetalle: archivos_detalle; peliculas:vector_peliculas; min: peliculaDetalle);
 var
-   i, valorMin, indiceMin: integer;
+   pos,i:integer;
 begin
-	valorMin:= v[1].codigo_calzado;
-	indiceMin:= 1;
+     pos:= 1;
+     min:= peliculas[pos];
 
-	for i:=1 to N do begin
-		if (v[i].codigo_calzado < valorMin) then begin
-			valorMin:=v[i].codigo_calzado;
-			indiceMin:= i;
-		end;
-	end;
-	devuelveMin:= indiceMin;
+     for i:= 1 to N do begin
+         if (min.datosPelicula.codigo > peliculas[i].datosPelicula.codigo) then begin
+            min:= peliculas[i];
+            pos:= i;
+         end;
+     end;
+     leer(archivosDetalle[pos], peliculas[pos]);
+
 end;
 
-procedure minimo(var r: vectorLocales; var min: datosVentas; var det:vectorLocales);
+{Escriba las declaraciones necesarias y un procedimiento que reciba los
+20 archivos y un String indicando la ruta del archivo maestro y genere el archivo
+maestro de la semana a partir de los 20 detalles (cada película deberá aparecer una
+vez en el maestro con los datos propios de la película y el total de asistentes que tuvo
+durante la semana).}
+
+procedure generarArchivoMaestro(var ruta:string; var archivosDetalle:archivos_detalle);
 var
-   i: integer;
+    archMaestro: maestro;
+    peliculas:vector_peliculas;
+    i, aux:integer;
+    min:peliculaDetalle;
+    peliculaM:peliculaMaestro;
 begin
-	i:= devuelveMin(r);
-	min:= r[i];
-	leer(det[i], regd[i]);
+
+     assign(archMaestro, ruta);
+     rewrite(archMaestro);
+
+     for i:=0 to N do begin
+       leer(archivosDetalle[i], peliculas[i]);
+     end;
+
+     minimo(archivosDetalle, peliculas, min);
+     while(min.datosPelicula.codigo <> valorAlto) do begin
+         aux:= min.datosPelicula.codigo;
+         peliculaM.datosPelicula:= min.datosPelicula;
+
+         while(aux = min.datosPelicula.codigo) do begin
+             peliculaM.totalAsistentes:=  peliculaM.totalAsistentes + min.cantAsistentes;
+             minimo(archivosDetalle, peliculas, min);
+         end;
+         write(archMaestro, peliculaM);
+     end;
+     close(archMaestro);
+
 end;
 
-
 var
-   maestro: archMaestro;
-   detalles: vectorLocales; // arreglo de archivos detalle
+   ruta:string;
    i:integer;
+   detalles:archivos_detalle;
 begin
-   // creo archivo maestro y detalles para probar el programa
-   assign(maestro, 'maestro.dat');
-   rewrite(maestro);
-   close(maestro);
 
-   reset(maestro);
-
-   for i:=0 to N do begin
-      reset(detalles[i]);  // suponiendo que ya existen
+   ruta:= 'C:\Users\Dolores\Documents\Facultad\Conceptos de Bases de Datos\Prácticas\Práctica 2';
+   for i:=1 to N do begin
+       assign (detalles[i], 'detalle' + i);
+       reset(detalles[i]);  // suponiendo que ya existen
    end;
 
+   generarArchivoMaestro(ruta, detalles);
 
-
-
-
-
-
-   close(maestro);
-   for i:=0 to N do begin
+   for i:=1 to N do begin
       close(detalles[i]);
    end;
 
