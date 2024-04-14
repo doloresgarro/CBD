@@ -102,8 +102,79 @@ end;
 archivo supuso la utilización de la técnica de lista invertida para reutilización
 de espacio (dejó un registro obsoleto al comienzo del archivo como cabecera de
 lista).}
+procedure eliminarIndumentariaLI(var archivo: archivoProductos);
+var
+   eliminarInd, pos:integer;
+   sLibre, reg:info;
+begin
+     reset(archivo);
+     writeln('Ingrese codigo de indumentaria a eliminar: ');
+     readln(eliminarInd);
+
+     // leo cabecera
+     read(archivo, sLibre);
+
+     while (eliminarInd.cod <> MARCA) and (not EOF(archivo)) do begin
+           read(archivo, reg);
+     end;
+
+     if (eliminarInd.cod = MARCA) then begin
+        nLibre:= filepos(archivo) - 1;      // guardo pos a eliminar
+        seek(archivo, nLibre);              // me posiciono ahi
+        write(archivo, sLibre);             // grabo contenido de la cabecera
+        str(nLibre, sLibre);                // convierte de number a string
+        seek(archivo, 0);                   // me posiciono en cabecera
+        write(archivo, sLibre);             // actualizo cabecera
+     end
+     else
+          writeln('No se encontro la indumentaria que desea eliminar');
+
+     close(archivo);
+end;
 
 
+{e. Re implemente c, sabiendo que se utiliza la técnica de lista en invertida}
+procedure agregarIndumentariaLI(var archivo:archivoProductos; nuevaInd:info);
+var
+   nuevaInd:info;
+   sLibre: info;
+   nLibre:integer;
+   cod:integer;
+begin
+     reset(archivo);
+
+     read(archivo, sLibre);
+     val(sLibre, nLibre, cod);              // convierte de string a number
+
+     if (nLibre = -1) then
+        seek(archivo, filesize(archivo));   // si no hay espacio libre lo coloca al final
+     else begin
+          seek(archivo, nLibre);            // me posiciono donde hay lugar
+          read(archivo, sLibre);            // lee contenido en esa pos
+          seek(archivo, 0);                 // se posiciona al principio
+          write(archivo, sLibre);           // reescribe cabecera
+          seek(archivo, nLibre);            // me posiciono en donde hay lugar
+     end;
+
+     write(archivo, nuevaInd);              // escribo indumentaria en la pos libre
+     close(archivo);
+end;
+
+{f. Re implementa a, para poder utilizar la técnica de lista invertida}
+
+procedure crearArchivoBinario_listaInvertida(var archivoTexto:text; var archivoBinario:archivoProductos);
+var
+   reg:info;
+begin
+     while (not EOF(archivoTexto)) do begin
+           readln(archivoTexto, reg.cod);
+           readln(archivoTexto, reg.nombre);
+           readln(archivoTexto, reg.descripcion);
+           readln(archivoTexto, reg.stock);
+           agregarIndumentariaLI(archivoBinario, reg);
+     end;
+
+end;
 
 
 // ------------------ PROGRAMA PRINCIPAL ------------------
@@ -122,6 +193,11 @@ begin
 
      agregarNuevaIndumentaria(archivoBinario);
 
+     eliminarIndumentariaLI(archivoBinario);
+
+     agregarIndumentariaLI(archivoBinario, ind);
+
+     crearArchivoBinario_listaInvertida(archivoTexto, archivoBinario);
 
 end.
 
