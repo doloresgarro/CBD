@@ -33,7 +33,7 @@ begin
      writeln('Ingrese codigo de disco a modificar el stock: ');
      readln(eliminarCod);
      while (eliminarCod <> FIN) do begin
-
+          seek(archivo, 0);               // como es un nuevo cod me posiciono al principio para buscarlo
           while (not EOF(archivo)) and (eliminarCod <> reg.cod) do begin
                  read(archivo, reg);  // -------------------------
           end;
@@ -60,13 +60,12 @@ begin
        read(archivo, dato)
     else
         dato.cod:= valorAlto;
-
 end;
 
 procedure eliminarDiscosSinStock(var archivo:archivoDiscos);
 var
     archivoNuevo:archivoDiscos;
-
+    reg:disco;
 begin
      assign(archivoNuevo, 'archivoNuevo');
      rewrite(archivoNuevo);               // creo archivo donde voy a almacenar discos que tienen stock
@@ -74,13 +73,16 @@ begin
 
      leer(archivo, reg);
      while(reg.cod <> valorAlto) do begin
-         if (reg.stock = 0) then
+         if (reg.stock <> 0) then
             write(archivoNuevo, reg);
          leer(archivo, reg);
      end;
 
      close(archivoNuevo);
      close(archivo);
+
+     erase(archivo); // elimino el archivo original
+     rename(archivoNuevo, 'archivoDiscos'); // renombro el nuevo archivo con el nombre del archivo original
 
 end;
 
